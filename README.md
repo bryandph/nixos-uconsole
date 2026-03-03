@@ -18,7 +18,7 @@ NixOS module for [ClockworkPi uConsole](https://www.clockworkpi.com/uconsole) ha
     };
 
     nixos-uconsole = {
-      url = "git+ssh://git@git.bph/bryan/nixos-uconsole.git";
+      url = "github:bryandph/nixos-uconsole";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         nixos-raspberrypi.follows = "nixos-raspberrypi";
