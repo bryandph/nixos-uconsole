@@ -1,7 +1,6 @@
 # RPi firmware config.txt for uConsole CM5
 # Configures DSI display, audio remap, and device tree overlays.
-# AIO board overlays (UART, GPS PPS, SPI, RTC) are NOT included here —
-# add those in your host config if you have the HackerGadgets AIO board.
+# AIO board overlays are conditionally added by aio-v1.nix.
 {
   config,
   lib,
