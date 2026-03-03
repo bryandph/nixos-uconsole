@@ -1,6 +1,6 @@
 # nixos-uconsole
 
-NixOS module for [ClockworkPi uConsole](https://www.clockworkpi.com/uconsole) hardware support with the CM5 (Lite) compute module. Provides the [ak-rex](https://github.com/ak-rex/ClockworkPi-linux) kernel fork (with panel-cwu50 DSI driver, backlight, battery/power drivers, and device tree overlays), RPi firmware configuration, automatic speaker/headphone GPIO switching, and optional [HackerGadgets AIO v1](https://wiki.clockworkpi.com/uconsole/extension-board) board support.
+NixOS module for [ClockworkPi uConsole](https://www.clockworkpi.com/uconsole) hardware support with the CM5 (Lite) compute module. Provides the [ak-rex](https://github.com/ak-rex/ClockworkPi-linux) kernel fork (with panel-cwu50 DSI driver, backlight, battery/power drivers, and device tree overlays), RPi firmware configuration, automatic speaker/headphone GPIO switching, and optional [HackerGadgets](https://hackergadgets.com/) expansion board support (AIO v1, NVMe).
 
 ## Quick Start
 
@@ -42,6 +42,7 @@ NixOS module for [ClockworkPi uConsole](https://www.clockworkpi.com/uconsole) ha
         {
           uconsole.enable = true;
           uconsole.aio.v1.enable = true; # if you have the AIO board
+          uconsole.nvme.enable = true;   # if you have the NVMe adapter
         }
 
         # Your host config...
@@ -72,6 +73,12 @@ NixOS module for [ClockworkPi uConsole](https://www.clockworkpi.com/uconsole) ha
 | `uconsole.aio.v1.lora.enable` | bool | `aio.v1.enable` | SX1262 LoRa transceiver on SPI1 |
 | `uconsole.aio.v1.rtc.enable` | bool | `aio.v1.enable` | PCF85063A real-time clock on I2C |
 
+### NVMe Adapter
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `uconsole.nvme.enable` | bool | `false` | Enable PCIe x1 for HackerGadgets NVMe adapter + battery board |
+
 ## What's Included
 
 - **Kernel** — ak-rex fork of `raspberrypi/linux` (`rpi-6.12.y` branch) with uConsole drivers: `panel-cwu50` (DSI display), `ocp8178_bl` (backlight), `clockworkpi-uconsole-cm5.dtbo`, `clockworkpi-custom-battery.dtbo`, and `axp20x` battery/power drivers.
@@ -79,6 +86,7 @@ NixOS module for [ClockworkPi uConsole](https://www.clockworkpi.com/uconsole) ha
 - **Audio switch** — systemd service that polls GPIO to automatically toggle the speaker amplifier when headphones are inserted/removed.
 - **Boot defaults** — Console on `tty1`, framebuffer rotation for the portrait-mounted display, I2C enabled, ZFS disabled, SD card root filesystem.
 - **AIO v1 board** (optional) — GPS/GPSD with PPS, RTL-SDR with udev rules, LoRa SPI overlay, RTC with I2C overlay, and shared GPIO tools. Each component can be individually enabled/disabled.
+- **NVMe adapter** (optional) — Enables PCIe x1 (`dtparam=pciex1`) for the [NVMe battery board](https://hackergadgets.com/products/nvme) connected through the [adapter board](https://hackergadgets.com/products/pre-order-adapter-board-for-uconsole-ugrade-kit). Disk layout (disko, etc.) is your responsibility.
 
 ## What's NOT Included
 
@@ -106,6 +114,7 @@ boot.kernelParams = lib.mkForce [ "cfg80211.ieee80211_regdom=US" ];
 - **Kernel:** Requires the [ak-rex ClockworkPi-linux](https://github.com/ak-rex/ClockworkPi-linux) fork — mainline and stock RPi kernels lack uConsole drivers
 - **Boot:** Designed for use with [nixos-raspberrypi](https://github.com/nvmd/nixos-raspberrypi) boot infrastructure
 - **AIO board:** [HackerGadgets AIO v1](https://wiki.clockworkpi.com/uconsole/extension-board) — GPS, RTL-SDR, LoRa (SX1262), RTC
+- **NVMe adapter:** [HackerGadgets NVMe battery board](https://hackergadgets.com/products/nvme) + [adapter board](https://hackergadgets.com/products/pre-order-adapter-board-for-uconsole-ugrade-kit) — M.2 NVMe via CM5 PCIe x1
 
 ## Upstream References
 
@@ -113,6 +122,8 @@ boot.kernelParams = lib.mkForce [ "cfg80211.ieee80211_regdom=US" ];
 - [clockworkpi/uConsole](https://github.com/clockworkpi/uConsole) — official hardware repo
 - [nvmd/nixos-raspberrypi](https://github.com/nvmd/nixos-raspberrypi) — NixOS RPi boot infrastructure
 - [HackerGadgets AIO v1](https://wiki.clockworkpi.com/uconsole/extension-board) — extension board wiki
+- [HackerGadgets NVMe battery board](https://hackergadgets.com/products/nvme) — NVMe expansion
+- [HackerGadgets adapter board](https://hackergadgets.com/products/pre-order-adapter-board-for-uconsole-ugrade-kit) — carrier board PCIe adapter
 
 ## License
 

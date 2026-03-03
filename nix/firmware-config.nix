@@ -1,6 +1,6 @@
 # RPi firmware config.txt for uConsole CM5
 # Configures DSI display, audio remap, and device tree overlays.
-# AIO board overlays are conditionally added by aio-v1.nix.
+# Optional overlays are conditionally added by aio-v1.nix and nvme.nix.
 {
   config,
   lib,
@@ -64,7 +64,6 @@
       [pi5]
       dtoverlay=clockworkpi-uconsole-cm5
       dtoverlay=vc4-kms-v3d-pi5,cma-384
-      dtparam=pciex1
     '';
   };
 }

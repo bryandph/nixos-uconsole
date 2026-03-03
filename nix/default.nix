@@ -8,6 +8,7 @@
     ./firmware-config.nix
     ./audio-switch.nix
     ./aio-v1.nix
+    ./nvme.nix
   ];
 
   options.uconsole.enable = lib.mkEnableOption "ClockworkPi uConsole hardware support";
