@@ -13,8 +13,7 @@
 
   clockworkpiKernel =
     (pkgs.buildLinux {
-      src = cfg.kernel.src;
-      version = cfg.kernel.version;
+      inherit (cfg.kernel) src version;
       modDirVersion = "${cfg.kernel.version}-v8-16k";
       defconfig = "bcm2712_defconfig";
       # Build with ONLY bcm2712_defconfig — do not merge NixOS common config.
