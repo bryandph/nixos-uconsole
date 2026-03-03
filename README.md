@@ -4,7 +4,7 @@ NixOS module for [ClockworkPi uConsole](https://www.clockworkpi.com/uconsole) ha
 
 ## Quick Start
 
-> **Prerequisite:** Your NixOS configuration must already use [nixos-raspberrypi](https://github.com/nvmd/nixos-raspberrypi) for RPi 5 / CM5 boot infrastructure (firmware, config.txt generation, SD image).
+> This module extends [nixos-raspberrypi](https://github.com/nvmd/nixos-raspberrypi), which provides the RPi 5 / CM5 boot infrastructure (firmware, config.txt generation, SD image).
 
 ```nix
 # flake.nix
