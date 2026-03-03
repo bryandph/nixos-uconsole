@@ -40,9 +40,11 @@ NixOS module for [ClockworkPi uConsole](https://www.clockworkpi.com/uconsole) ha
         # uConsole hardware support
         nixos-uconsole.nixosModules.uconsole
         {
-          uconsole.enable = true;
-          uconsole.aio.v1.enable = true; # if you have the AIO board
-          uconsole.nvme.enable = true;   # if you have the NVMe adapter
+          uconsole = {
+            enable = true;
+            aio.v1.enable = true; # if you have the AIO v1 board
+            nvme.enable = true;   # if you have the NVMe adapter
+          };
         }
 
         # Your host config...
