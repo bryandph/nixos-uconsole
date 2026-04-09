@@ -9,7 +9,7 @@
     };
   };
 
-  outputs = inputs @ {nixpkgs, ...}: {
+  outputs = _: {
     nixosModules = {
       uconsole = import ./nix;
       default = import ./nix;
