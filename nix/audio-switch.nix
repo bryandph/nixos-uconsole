@@ -17,18 +17,20 @@
       coreutils
     ];
     text = ''
-      CHIP="gpiochip4"
-      HP_GPIO=10
-      SPK_GPIO=11
+      # Address lines by name (resolved across all chips) rather than a chip
+      # number — the main GPIO bank's gpiochipN index is not stable across
+      # kernels (it moved from gpiochip4 to gpiochip0/pinctrl-rp1).
+      HP_LINE="GPIO10"   # headphone detect (input): 0 = none, 1 = inserted
+      SPK_LINE="GPIO11"  # speaker amp enable (output): 1 = on, 0 = off
 
       echo "uconsole-audio: starting speaker/headphone switch"
 
       while true; do
-        val=$(gpioget --numeric -c "$CHIP" "$HP_GPIO")
+        val=$(gpioget --numeric "$HP_LINE")
         if [ "$val" = "0" ]; then
-          gpioset -c "$CHIP" "$SPK_GPIO"=1  # no headphone — speaker on
+          gpioset "$SPK_LINE"=1  # no headphone — speaker on
         else
-          gpioset -c "$CHIP" "$SPK_GPIO"=0  # headphone inserted — speaker off
+          gpioset "$SPK_LINE"=0  # headphone inserted — speaker off
         fi
         sleep 1
       done
