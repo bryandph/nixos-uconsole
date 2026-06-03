@@ -22,6 +22,7 @@
       kernelParams = lib.mkForce [
         "console=tty1"
         "fbcon=rotate:1" # portrait-mounted DSI display
+        "quiet" # keep boot/systemd console spam off the tuigreet greeter
       ];
 
       kernelModules = ["i2c-dev"];
