@@ -7,6 +7,7 @@
     ./kernel.nix
     ./firmware-config.nix
     ./audio-switch.nix
+    ./power.nix
     ./aio-v1.nix
     ./nvme.nix
   ];
