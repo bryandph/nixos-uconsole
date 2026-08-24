@@ -1,35 +1,32 @@
-# ak-rex ClockworkPi kernel (rpi-6.12.y branch)
-# Fork of raspberrypi/linux with uConsole drivers:
-#   - panel-cwu50 (DSI display), ocp8178_bl (backlight)
-#   - clockworkpi-uconsole-cm5.dtbo, clockworkpi-custom-battery.dtbo
-#   - axp20x battery/power drivers enabled
+# uConsole CM5 kernel: nixos-raspberrypi's linux_rpi5 (same kernel as
+# the rest of the Pi 5 fleet) plus an owned ClockworkPi patch series
+# extracted from the ak-rex/ClockworkPi-linux fork (rpi-7.1.y branch,
+# the consolidated state of the drivers) and rebased onto rpi-6.18.y:
+#   0001  panel-cwu50 DSI panel driver (merged CM3/CM4/CM5 driver)
+#   0002  ocp8178 1-wire backlight driver
+#   0003  clockworkpi-uconsole-cm5 + clockworkpi-custom-battery overlays
+#   0004  AXP228 power: fuel-gauge calibration + V_OFF plumbing
+#         (axp20x_battery), VBUS path kick on AC plug events
+#         (axp20x_ac_power), CHGLED preserve on power-off (mfd/axp20x)
 {
   config,
   lib,
   pkgs,
+  nixos-raspberrypi,
   ...
 }: let
   cfg = config.uconsole;
 
-  clockworkpiKernel =
-    (pkgs.buildLinux {
-      inherit (cfg.kernel) src version;
-      modDirVersion = "${cfg.kernel.version}-v8-16k";
-      defconfig = "bcm2712_defconfig";
-      # Build with ONLY bcm2712_defconfig — do not merge NixOS common config.
-      autoModules = false;
-      # ARM64 RPi defconfig lacks many x86 options that NixOS common config
-      # tries to set — tolerate mismatches (same as nixos-raspberrypi's linux-rpi.nix)
-      ignoreConfigErrors = true;
-    }).overrideAttrs (old: {
-      # The RPi firmware checks for ${os_prefix}${overlay_prefix}README
-      # before using os_prefix for overlay path resolution. Without this
-      # file, the firmware silently ignores all dtoverlay= entries in
-      # config.txt (overlays directory exists but firmware falls back to
-      # looking at the non-existent root overlays/ directory).
-      # This also enables the firmware's auto-application of bcm2712d0.dtbo
-      # on D0 silicon (CM5), which corrects pinctrl register addresses.
-      # See: raspberrypi/linux#3237, home-assistant/operating-system#3079
+  # Same package the raspberry-pi-5.base module installs, with one build
+  # fixup: the RPi firmware checks for ${os_prefix}${overlay_prefix}README
+  # before using os_prefix for overlay path resolution.  Without this
+  # file, the firmware silently ignores all dtoverlay= entries in
+  # config.txt.  This also enables the firmware's auto-application of
+  # bcm2712d0.dtbo on D0 silicon (CM5), which corrects pinctrl register
+  # addresses.  See: raspberrypi/linux#3237,
+  # home-assistant/operating-system#3079
+  kernelWithOverlayReadme =
+    nixos-raspberrypi.packages.${pkgs.stdenv.hostPlatform.system}.linux_rpi5.overrideAttrs (old: {
       postFixup =
         (old.postFixup or "")
         + ''
@@ -37,27 +34,45 @@
         '';
     });
 in {
-  options.uconsole.kernel = {
-    src = lib.mkOption {
-      type = lib.types.package;
-      default = pkgs.fetchFromGitHub {
-        owner = "ak-rex";
-        repo = "ClockworkPi-linux";
-        rev = "4b5b5fe35abbbf4193ddbeab149833172096066b";
-        hash = "sha256-InyO2ChPqwqzP0PNoKNdYRXAAQ4VbSJrmEy8uif59fc=";
-      };
-      description = "Kernel source for the ClockworkPi uConsole (ak-rex fork).";
-    };
-
-    version = lib.mkOption {
-      type = lib.types.str;
-      default = "6.12.67";
-      description = "Kernel version string matching the source.";
-    };
-  };
-
   config = lib.mkIf cfg.enable {
-    # Override nixos-raspberrypi's default Pi 5 kernel with ak-rex fork
-    boot.kernelPackages = lib.mkForce (pkgs.linuxPackagesFor clockworkpiKernel);
+    # mkForce over raspberry-pi-5.base's mkDefault of the same kernel
+    boot.kernelPackages = lib.mkForce (pkgs.linuxPackagesFor kernelWithOverlayReadme);
+
+    boot.kernelPatches = [
+      {
+        name = "clockworkpi-panel-cwu50";
+        patch = ./patches/0001-drm-panel-add-clockworkpi-cwu50.patch;
+        structuredExtraConfig = with lib.kernel; {
+          DRM_PANEL_CWU50 = module;
+        };
+      }
+      {
+        name = "clockworkpi-backlight-ocp8178";
+        patch = ./patches/0002-backlight-add-ocp8178.patch;
+        structuredExtraConfig = with lib.kernel; {
+          BACKLIGHT_OCP8178 = module;
+        };
+      }
+      {
+        name = "clockworkpi-overlays";
+        patch = ./patches/0003-overlays-add-clockworkpi-uconsole.patch;
+      }
+      {
+        name = "clockworkpi-axp228-power";
+        patch = ./patches/0004-power-axp20x-clockworkpi-uconsole.patch;
+        # AXP228 PMIC stack (mirrors the fork's bcm2712_defconfig
+        # additions): mfd + regulators built in so display/wifi rails
+        # come up with the driver core; leaf drivers as modules.
+        structuredExtraConfig = with lib.kernel; {
+          MFD_AXP20X_I2C = yes;
+          REGULATOR_AXP20X = yes;
+          INPUT_AXP20X_PEK = yes;
+          AXP20X_POWER = module;
+          CHARGER_AXP20X = module;
+          BATTERY_AXP20X = module;
+          AXP20X_ADC = module;
+        };
+      }
+    ];
   };
 }
