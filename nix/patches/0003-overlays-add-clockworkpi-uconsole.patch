@@ -41,7 +41,7 @@ new file mode 100644
 index 0000000..60badef
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlays/clockworkpi-uconsole-cm5-overlay.dts
-@@ -0,0 +1,181 @@
+@@ -0,0 +1,179 @@
 +/dts-v1/;
 +/plugin/;
 +
@@ -58,8 +58,6 @@ index 0000000..60badef
 +			#size-cells = <0>;
 +			compatible = "i2c-gpio";
 +			reg = <3>;
-+			pinctrl-0 = <&i2c0_pins>;
-+			pinctrl-names = "default";
 +			gpios = <&rp1_gpio 0 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)
 +					&rp1_gpio 1 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
 +			i2c-gpio,delay-us = <2>;
